@@ -1,7 +1,7 @@
-
 import pandas as pd
 import numpy as np
 from pathlib import Path
+
 
 # ============================================================
 # LOAD DATA
@@ -376,12 +376,41 @@ df = df[
     df["prior_order_count"] > 0
 ].copy()
 
+
 print("\n" + "=" * 60)
 print("AFTER REMOVING FIRST SUPPLIER ORDERS")
 print("=" * 60)
 
 print("\nDataset shape:")
 print(df.shape)
+
+
+# ============================================================
+# SAVE ENGINEERED DELIVERY RISK DATASET
+# ============================================================
+#
+# This file contains the order-level historical features
+# used by the delivery-risk ML model.
+#
+# Saving it makes the feature-engineering stage reproducible
+# and allows us to inspect/audit the model input later.
+# ============================================================
+
+PROCESSED_DIR = Path("data/processed")
+
+PROCESSED_DIR.mkdir(
+    exist_ok=True
+)
+
+df.to_csv(
+    PROCESSED_DIR / "delivery_risk_features.csv",
+    index=False
+)
+
+print("\nEngineered delivery risk dataset saved:")
+print(
+    "data/processed/delivery_risk_features.csv"
+)
 
 
 # ============================================================
@@ -915,7 +944,14 @@ print(
     "outputs/delivery_risk_feature_importance.csv"
 )
 
+print(
+    "\nEngineered features:"
+)
+
+print(
+    "data/processed/delivery_risk_features.csv"
+)
+
 print("\n" + "=" * 60)
 print("DELIVERY RISK ML PIPELINE COMPLETE")
 print("=" * 60)
-

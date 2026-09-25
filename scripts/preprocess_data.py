@@ -650,3 +650,4 @@ print("DATA QUALITY REPORT")
 print("==============================")
 
 print(quality_report)
+

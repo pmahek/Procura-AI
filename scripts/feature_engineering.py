@@ -438,3 +438,16 @@ supplier_features.to_csv(
 
 print("\nFeature dataset saved to:")
 print(output_path)
+
+print("\nRISK FEATURE DISTRIBUTIONS")
+print("\nLate delivery rate:")
+print(supplier_features["late_delivery_rate"].describe())
+
+print("\nDefect rate:")
+print(supplier_features["defect_rate"].describe())
+
+print("\nOn-time delivery rate:")
+print(supplier_features["on_time_delivery_rate"].describe())
+
+print("\nQuality acceptance rate:")
+print(supplier_features["quality_acceptance_rate"].describe())

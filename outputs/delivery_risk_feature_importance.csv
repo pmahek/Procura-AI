@@ -1,0 +1,22 @@
+feature,importance
+num__prior_avg_delivery_delay,0.1278434281049578
+num__prior_avg_order_value,0.1149625675902636
+num__prior_quality_acceptance_rate,0.11290794449477817
+num__prior_total_spend,0.11176341076832552
+num__total_amount,0.11091828173271419
+num__prior_defect_rate,0.1073820992521059
+num__prior_late_rate,0.07034115374190088
+num__years_in_business,0.06690134500277715
+num__prior_order_count,0.04594289897439808
+cat__location_Bengaluru,0.016192950609285238
+cat__category_Office Supplies,0.014622737411714552
+cat__location_Chennai,0.014067009060628787
+cat__location_Mumbai,0.012676364255684238
+cat__category_Furniture,0.012534851125231387
+cat__category_IT Equipment,0.011382473854868682
+cat__category_Electronics,0.010220177894203012
+cat__category_Industrial Equipment,0.008860952414658967
+cat__location_Delhi,0.008731645606845391
+cat__location_Pune,0.008045385078845384
+cat__location_Ahmedabad,0.007448213855734836
+cat__location_Hyderabad,0.006254109170078254

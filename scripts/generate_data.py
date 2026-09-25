@@ -1,9 +1,17 @@
-import pandas as pd
+import os
 import numpy as np
+import pandas as pd
 
 
-# Reproducible random generator
-rng = np.random.default_rng(42)
+# ============================================================
+# CONFIGURATION
+# ============================================================
+
+RANDOM_SEED = 42
+rng = np.random.default_rng(RANDOM_SEED)
+
+RAW_DATA_DIR = "data/raw"
+os.makedirs(RAW_DATA_DIR, exist_ok=True)
 
 
 # ============================================================
@@ -12,59 +20,91 @@ rng = np.random.default_rng(42)
 
 supplier_count = 100
 
-supplier_ids = [f"SUP{i:03d}" for i in range(1, supplier_count + 1)]
+supplier_ids = [
+    f"SUP{i:03d}"
+    for i in range(1, supplier_count + 1)
+]
 
 supplier_names = [
     f"{prefix} {suffix}"
     for prefix, suffix in zip(
         rng.choice(
-            ["Alpha", "Beta", "Gamma", "Delta", "Nova",
-             "Prime", "Vertex", "Global", "Tech", "Apex"],
-            supplier_count
+            [
+                "Apex",
+                "Global",
+                "Prime",
+                "Metro",
+                "United",
+                "Reliable",
+                "Eastern",
+                "Western",
+                "National",
+                "Dynamic",
+            ],
+            supplier_count,
         ),
         rng.choice(
-            ["Technologies", "Solutions", "Industries", "Systems",
-             "Enterprises", "Supplies"],
-            supplier_count
-        )
+            [
+                "Industries",
+                "Solutions",
+                "Supplies",
+                "Enterprises",
+                "Corporation",
+                "Technologies",
+                "Traders",
+                "Systems",
+            ],
+            supplier_count,
+        ),
     )
 ]
 
-categories = rng.choice(
-    ["Electronics", "Office Supplies", "IT Equipment",
-     "Furniture", "Industrial Equipment"],
-    supplier_count
+categories = [
+    "IT Equipment",
+    "Office Supplies",
+    "Industrial",
+    "Electrical",
+    "Packaging",
+    "Safety Equipment",
+]
+
+locations = [
+    "Bangalore",
+    "Mumbai",
+    "Pune",
+    "Delhi",
+    "Hyderabad",
+    "Chennai",
+    "Ahmedabad",
+]
+
+suppliers = pd.DataFrame(
+    {
+        "supplier_id": supplier_ids,
+        "supplier_name": supplier_names,
+        "category": rng.choice(categories, supplier_count),
+        "location": rng.choice(locations, supplier_count),
+        "years_in_business": rng.integers(
+            1,
+            31,
+            supplier_count,
+        ),
+        "status": rng.choice(
+            ["Active", "Inactive"],
+            supplier_count,
+            p=[0.9, 0.1],
+        ),
+        "created_date": pd.to_datetime(
+            rng.choice(
+                pd.date_range(
+                    "1995-01-01",
+                    "2024-12-31",
+                ),
+                supplier_count,
+            )
+        ),
+    }
 )
-
-cities = rng.choice(
-    ["Bengaluru", "Mumbai", "Pune", "Delhi",
-     "Hyderabad", "Chennai", "Ahmedabad"],
-    supplier_count
-)
-
-years_in_business = rng.integers(2, 26, supplier_count)
-
-status = rng.choice(
-    ["Active", "Active", "Active", "Inactive"],
-    supplier_count
-)
-
-created_dates = pd.to_datetime(
-    rng.choice(
-        pd.date_range("2000-01-01", "2024-12-31"),
-        supplier_count
-    )
-)
-
-suppliers = pd.DataFrame({
-    "supplier_id": supplier_ids,
-    "supplier_name": supplier_names,
-    "category": categories,
-    "location": cities,
-    "years_in_business": years_in_business,
-    "status": status,
-    "created_date": created_dates
-})
 
 
 # ============================================================
@@ -73,81 +113,53 @@ suppliers = pd.DataFrame({
 
 item_count = 50
 
-item_ids = [f"ITEM{i:03d}" for i in range(1, item_count + 1)]
-
-item_names = rng.choice(
-    [
-        "Business Laptop",
-        "Desktop Computer",
-        "Monitor",
-        "Keyboard",
-        "Mouse",
-        "Printer",
-        "Office Chair",
-        "Desk",
-        "Network Switch",
-        "Router",
-        "Server",
-        "UPS",
-        "Projector",
-        "Tablet",
-        "Barcode Scanner"
-    ],
-    item_count
-)
-
-item_categories = rng.choice(
-    ["Electronics", "IT Equipment", "Office Supplies", "Furniture"],
-    item_count
-)
-
-descriptions = [
-    f"Business procurement item {i}"
+item_ids = [
+    f"ITEM{i:03d}"
     for i in range(1, item_count + 1)
 ]
 
-units = rng.choice(
-    ["Each", "Box", "Unit"],
-    item_count
+item_categories = [
+    "IT Equipment",
+    "Office Supplies",
+    "Electrical",
+    "Industrial",
+    "Safety Equipment",
+]
+
+units = [
+    "Piece",
+    "Box",
+    "Kg",
+    "Set",
+    "Pack",
+]
+
+items = pd.DataFrame(
+    {
+        "item_id": item_ids,
+        "item_name": [
+            f"Item {i}"
+            for i in range(1, item_count + 1)
+        ],
+        "category": rng.choice(
+            item_categories,
+            item_count,
+        ),
+        "unit_of_measure": rng.choice(
+            units,
+            item_count,
+        ),
+        "description": [
+            f"Procurement item {i}"
+            for i in range(1, item_count + 1)
+        ],
+        "specifications": [
+            f"Standard specification for item {i}"
+            for i in range(1, item_count + 1)
+        ],
+    }
 )
 
-specifications = rng.choice(
-    [
-        "Standard specification",
-        "Enterprise specification",
-        "Premium specification",
-        "Basic specification"
-    ],
-    item_count
-)
-
-items = pd.DataFrame({
-    "item_id": item_ids,
-    "item_name": item_names,
-    "category": item_categories,
-    "description": descriptions,
-    "unit_of_measure": units,
-    "specifications": specifications
-})
-
-
-# ============================================================
-# 3. SAVE
-# ============================================================
-
-suppliers.to_csv("data/raw/suppliers.csv", index=False)
-items.to_csv("data/raw/items.csv", index=False)
-
-print("Supplier records:", len(suppliers))
-print("Item records:", len(items))
-
-print("\nSuppliers:")
-print(suppliers.head())
-
-print("\nItems:")
-print(items.head())
-
-print("\nData generation completed.")
 
 # ============================================================
 # 3. RFQs
@@ -155,59 +167,65 @@ print("\nData generation completed.")
 
 rfq_count = 500
 
-rfq_ids = [f"RFQ{i:04d}" for i in range(1, rfq_count + 1)]
+rfq_ids = [
+    f"RFQ{i:04d}"
+    for i in range(1, rfq_count + 1)
+]
 
 rfq_dates = pd.to_datetime(
     rng.choice(
-        pd.date_range("2024-01-01", "2026-09-01"),
-        rfq_count
+        pd.date_range(
+            "2024-01-01",
+            "2026-08-31",
+        ),
+        rfq_count,
     )
 )
 
-required_delivery_dates = rfq_dates + pd.to_timedelta(
-    rng.integers(15, 90, rfq_count),
-    unit="D"
+required_delivery_dates = (
+    rfq_dates
+    + pd.to_timedelta(
+        rng.integers(
+            15,
+            91,
+            rfq_count,
+        ),
+        unit="D",
+    )
 )
 
-departments = rng.choice(
-    ["IT", "Finance", "Operations", "HR", "Procurement"],
-    rfq_count
+rfqs = pd.DataFrame(
+    {
+        "rfq_id": rfq_ids,
+        "rfq_date": rfq_dates,
+        "department": rng.choice(
+            [
+                "IT",
+                "Finance",
+                "HR",
+                "Operations",
+                "Procurement",
+                "Marketing",
+            ],
+            rfq_count,
+        ),
+        "required_delivery_date": required_delivery_dates,
+        "status": rng.choice(
+            [
+                "Open",
+                "Closed",
+                "Awarded",
+                "Cancelled",
+            ],
+            rfq_count,
+        ),
+        "description": [
+            f"Procurement request for {rfq_id}"
+            for rfq_id in rfq_ids
+        ],
+    }
 )
 
-rfq_status = rng.choice(
-    ["Open", "Closed", "Awarded", "Cancelled"],
-    rfq_count
-)
-
-rfq_descriptions = [
-    f"Procurement requirement for RFQ {rfq_id}"
-    for rfq_id in rfq_ids
-]
-
-rfqs = pd.DataFrame({
-    "rfq_id": rfq_ids,
-    "rfq_date": rfq_dates,
-    "required_delivery_date": required_delivery_dates,
-    "department": departments,
-    "status": rfq_status,
-    "description": rfq_descriptions
-})
-# ============================================================
-# 4. SAVE
-# ============================================================
-
-suppliers.to_csv("data/raw/suppliers.csv", index=False)
-items.to_csv("data/raw/items.csv", index=False)
-rfqs.to_csv("data/raw/rfqs.csv", index=False)
-
-print("Supplier records:", len(suppliers))
-print("Item records:", len(items))
-print("RFQ records:", len(rfqs))
-
-print("\nRFQs:")
-print(rfqs.head())
-
-print("\nData generation completed.")
 
 # ============================================================
 # 4. RFQ ITEMS
@@ -216,50 +234,68 @@ print("\nData generation completed.")
 rfq_item_count = 1200
 
 rfq_item_ids = [
-    f"RFQI{i:05d}" for i in range(1, rfq_item_count + 1)
+    f"RFQI{i:04d}"
+    for i in range(1, rfq_item_count + 1)
 ]
 
-rfq_item_rfq_ids = rng.choice(
-    rfq_ids,
+# Guarantee that every RFQ has at least one item.
+
+required_rfq_ids = rfqs["rfq_id"].tolist()
+
+remaining_count = (
     rfq_item_count
+    - len(required_rfq_ids)
 )
 
-rfq_item_ids_selected = rng.choice(
-    item_ids,
-    rfq_item_count
+additional_rfq_ids = rng.choice(
+    required_rfq_ids,
+    remaining_count,
 )
 
-quantities = rng.integers(
-    10,
-    1000,
-    rfq_item_count
+rfq_item_rfq_ids = (
+    required_rfq_ids
+    + additional_rfq_ids.tolist()
 )
 
-rfq_items = pd.DataFrame({
-    "rfq_item_id": rfq_item_ids,
-    "rfq_id": rfq_item_rfq_ids,
-    "item_id": rfq_item_ids_selected,
-    "quantity": quantities
-})
+rng.shuffle(rfq_item_rfq_ids)
+
+rfq_items = pd.DataFrame(
+    {
+        "rfq_item_id": rfq_item_ids,
+        "rfq_id": rfq_item_rfq_ids,
+        "item_id": rng.choice(
+            item_ids,
+            rfq_item_count,
+        ),
+        "quantity": rng.integers(
+            1,
+            501,
+            rfq_item_count,
+        ),
+    }
+)
+
 
 # ============================================================
-# 5. SAVE
+# RFQ ITEM VALIDATION
 # ============================================================
 
-suppliers.to_csv("data/raw/suppliers.csv", index=False)
-items.to_csv("data/raw/items.csv", index=False)
-rfqs.to_csv("data/raw/rfqs.csv", index=False)
-rfq_items.to_csv("data/raw/rfq_items.csv", index=False)
+rfq_item_counts = (
+    rfq_items.groupby("rfq_id")
+    .size()
+)
 
-print("Supplier records:", len(suppliers))
-print("Item records:", len(items))
-print("RFQ records:", len(rfqs))
-print("RFQ item records:", len(rfq_items))
+missing_rfqs = [
+    rfq_id
+    for rfq_id in rfq_ids
+    if rfq_id not in rfq_item_counts.index
+]
 
-print("\nRFQ Items:")
-print(rfq_items.head())
+if missing_rfqs:
+    raise ValueError(
+        f"These RFQs have no items: {missing_rfqs}"
+    )
 
-print("\nData generation completed.")
 
 # ============================================================
 # 5. QUOTATIONS
@@ -268,62 +304,75 @@ print("\nData generation completed.")
 quotation_count = 1500
 
 quotation_ids = [
-    f"QUO{i:05d}" for i in range(1, quotation_count + 1)
+    f"QUO{i:04d}"
+    for i in range(1, quotation_count + 1)
 ]
 
 quotation_rfq_ids = rng.choice(
     rfq_ids,
-    quotation_count
+    quotation_count,
 )
 
 quotation_supplier_ids = rng.choice(
     supplier_ids,
-    quotation_count
+    quotation_count,
 )
 
 quotation_dates = pd.to_datetime(
     rng.choice(
-        pd.date_range("2024-01-01", "2026-09-10"),
-        quotation_count
+        pd.date_range(
+            "2024-01-01",
+            "2026-09-10",
+        ),
+        quotation_count,
     )
 )
 
-valid_until_dates = quotation_dates + pd.to_timedelta(
-    rng.integers(15, 90, quotation_count),
-    unit="D"
+valid_until_dates = (
+    quotation_dates
+    + pd.to_timedelta(
+        rng.integers(
+            15,
+            91,
+            quotation_count,
+        ),
+        unit="D",
+    )
 )
 
-currencies = rng.choice(
-    ["INR", "INR", "INR", "USD"],
-    quotation_count
+quotations = pd.DataFrame(
+    {
+        "quotation_id": quotation_ids,
+        "rfq_id": quotation_rfq_ids,
+        "supplier_id": quotation_supplier_ids,
+        "quotation_date": quotation_dates,
+        "valid_until": valid_until_dates,
+        "currency": rng.choice(
+            ["INR", "USD"],
+            quotation_count,
+            p=[0.9, 0.1],
+        ),
+        "payment_terms": rng.choice(
+            [
+                "Net 15",
+                "Net 30",
+                "Net 45",
+                "Net 60",
+            ],
+            quotation_count,
+        ),
+        "status": rng.choice(
+            [
+                "Submitted",
+                "Accepted",
+                "Rejected",
+                "Expired",
+            ],
+            quotation_count,
+        ),
+    }
 )
 
-payment_terms = rng.choice(
-    [
-        "Net 30",
-        "Net 45",
-        "Net 60",
-        "Advance 30%",
-        "50% Advance"
-    ],
-    quotation_count
-)
-
-quotation_status = rng.choice(
-    ["Submitted", "Accepted", "Rejected", "Expired"],
-    quotation_count
-)
-
-quotations = pd.DataFrame({
-    "quotation_id": quotation_ids,
-    "rfq_id": quotation_rfq_ids,
-    "supplier_id": quotation_supplier_ids,
-    "quotation_date": quotation_dates,
-    "valid_until": valid_until_dates,
-    "currency": currencies,
-    "payment_terms": payment_terms,
-    "status": quotation_status
-})
 
 # ============================================================
 # 6. QUOTATION ITEMS
@@ -332,86 +381,129 @@ quotations = pd.DataFrame({
 quotation_item_count = 3500
 
 quotation_item_ids = [
-    f"QUOI{i:05d}"
+    f"QUOI{i:04d}"
     for i in range(1, quotation_item_count + 1)
 ]
 
+# RFQ -> RFQ items
+rfq_to_items = (
+    rfq_items
+    .groupby("rfq_id")["rfq_item_id"]
+    .apply(list)
+    .to_dict()
+)
+
+# Quotation -> RFQ
+quotation_to_rfq = dict(
+    zip(
+        quotations["quotation_id"],
+        quotations["rfq_id"],
+    )
+)
+
 quotation_item_quotation_ids = rng.choice(
     quotation_ids,
-    quotation_item_count
+    quotation_item_count,
 )
 
-quotation_item_rfq_item_ids = rng.choice(
-    rfq_item_ids,
-    quotation_item_count
+quotation_item_rfq_item_ids = []
+
+for quotation_id in quotation_item_quotation_ids:
+
+    rfq_id = quotation_to_rfq[quotation_id]
+
+    available_rfq_items = rfq_to_items[rfq_id]
+
+    selected_rfq_item = rng.choice(
+        available_rfq_items
+    )
+
+    quotation_item_rfq_item_ids.append(
+        selected_rfq_item
+    )
+
+
+quotation_items = pd.DataFrame(
+    {
+        "quotation_item_id": quotation_item_ids,
+        "quotation_id": quotation_item_quotation_ids,
+        "rfq_item_id": quotation_item_rfq_item_ids,
+        "unit_price": np.round(
+            rng.uniform(
+                100,
+                100000,
+                quotation_item_count,
+            ),
+            2,
+        ),
+        "quantity_quoted": rng.integers(
+            1,
+            501,
+            quotation_item_count,
+        ),
+        "delivery_days": rng.integers(
+            5,
+            121,
+            quotation_item_count,
+        ),
+        "warranty_months": rng.integers(
+            0,
+            61,
+            quotation_item_count,
+        ),
+        "discount_percent": np.round(
+            rng.uniform(
+                0,
+                25,
+                quotation_item_count,
+            ),
+            2,
+        ),
+    }
 )
 
-unit_prices = np.round(
-    rng.uniform(500, 150000, quotation_item_count),
-    2
-)
-
-quantities_quoted = rng.integers(
-    10,
-    1000,
-    quotation_item_count
-)
-
-delivery_days = rng.integers(
-    5,
-    90,
-    quotation_item_count
-)
-
-warranty_months = rng.choice(
-    [6, 12, 18, 24, 36],
-    quotation_item_count
-)
-
-discount_percent = np.round(
-    rng.uniform(0, 20, quotation_item_count),
-    2
-)
-
-quotation_items = pd.DataFrame({
-    "quotation_item_id": quotation_item_ids,
-    "quotation_id": quotation_item_quotation_ids,
-    "rfq_item_id": quotation_item_rfq_item_ids,
-    "unit_price": unit_prices,
-    "quantity_quoted": quantities_quoted,
-    "delivery_days": delivery_days,
-    "warranty_months": warranty_months,
-    "discount_percent": discount_percent
-})
 
 # ============================================================
-# 7. SAVE
+# QUOTATION RELATIONSHIP VALIDATION
 # ============================================================
 
-suppliers.to_csv("data/raw/suppliers.csv", index=False)
-items.to_csv("data/raw/items.csv", index=False)
-rfqs.to_csv("data/raw/rfqs.csv", index=False)
-rfq_items.to_csv("data/raw/rfq_items.csv", index=False)
-quotations.to_csv("data/raw/quotations.csv", index=False)
-quotation_items.to_csv(
-    "data/raw/quotation_items.csv",
-    index=False
+quotation_item_check = quotation_items.merge(
+    quotations[
+        [
+            "quotation_id",
+            "rfq_id",
+        ]
+    ],
+    on="quotation_id",
+    how="left",
 )
 
-print("Supplier records:", len(suppliers))
-print("Item records:", len(items))
-print("RFQ records:", len(rfqs))
-print("RFQ item records:", len(rfq_items))
-print("Quotation records:", len(quotations))
-print("Quotation item records:", len(quotation_items))
+quotation_item_check = quotation_item_check.merge(
+    rfq_items[
+        [
+            "rfq_item_id",
+            "rfq_id",
+        ]
+    ],
+    on="rfq_item_id",
+    how="left",
+    suffixes=(
+        "_quotation",
+        "_item",
+    ),
+)
 
-print("\nQuotations:")
-print(quotations.head())
+relationship_errors = quotation_item_check[
+    quotation_item_check["rfq_id_quotation"]
+    != quotation_item_check["rfq_id_item"]
+]
 
-print("\nQuotation Items:")
-print(quotation_items.head())
+if len(relationship_errors) > 0:
+    raise ValueError(
+        "Quotation/RFQ relationship errors: "
+        f"{len(relationship_errors)}"
+    )
 
-print("\nData generation completed.")
 
 # ============================================================
 # 7. ORDERS
@@ -420,51 +512,56 @@ print("\nData generation completed.")
 order_count = 1000
 
 order_ids = [
-    f"ORD{i:05d}"
+    f"ORD{i:04d}"
     for i in range(1, order_count + 1)
 ]
 
-order_supplier_ids = rng.choice(
-    supplier_ids,
-    order_count
+orders = pd.DataFrame(
+    {
+        "order_id": order_ids,
+        "supplier_id": rng.choice(
+            supplier_ids,
+            order_count,
+        ),
+        "rfq_id": rng.choice(
+            rfq_ids,
+            order_count,
+        ),
+        "order_date": pd.to_datetime(
+            rng.choice(
+                pd.date_range(
+                    "2024-01-01",
+                    "2026-08-31",
+                ),
+                order_count,
+            )
+        ),
+        "total_amount": np.round(
+            rng.uniform(
+                5000,
+                500000,
+                order_count,
+            ),
+            2,
+        ),
+        "currency": rng.choice(
+            ["INR", "USD"],
+            order_count,
+            p=[0.9, 0.1],
+        ),
+        "status": rng.choice(
+            [
+                "Created",
+                "Approved",
+                "Completed",
+                "Cancelled",
+            ],
+            order_count,
+        ),
+    }
 )
 
-order_rfq_ids = rng.choice(
-    rfq_ids,
-    order_count
-)
 
-order_dates = pd.to_datetime(
-    rng.choice(
-        pd.date_range("2024-01-01", "2026-08-31"),
-        order_count
-    )
-)
-
-order_amounts = np.round(
-    rng.uniform(10000, 5000000, order_count),
-    2
-)
-
-order_currencies = rng.choice(
-    ["INR", "INR", "INR", "USD"],
-    order_count
-)
-
-order_status = rng.choice(
-    ["Completed", "In Progress", "Cancelled"],
-    order_count
-)
-
-orders = pd.DataFrame({
-    "order_id": order_ids,
-    "supplier_id": order_supplier_ids,
-    "rfq_id": order_rfq_ids,
-    "order_date": order_dates,
-    "total_amount": order_amounts,
-    "currency": order_currencies,
-    "status": order_status
-})
 # ============================================================
 # 8. ORDER ITEMS
 # ============================================================
@@ -472,207 +569,405 @@ orders = pd.DataFrame({
 order_item_count = 2200
 
 order_item_ids = [
-    f"ORDI{i:05d}"
+    f"ORDI{i:04d}"
     for i in range(1, order_item_count + 1)
 ]
 
-order_item_order_ids = rng.choice(
-    order_ids,
-    order_item_count
+order_items = pd.DataFrame(
+    {
+        "order_item_id": order_item_ids,
+        "order_id": rng.choice(
+            order_ids,
+            order_item_count,
+        ),
+        "item_id": rng.choice(
+            item_ids,
+            order_item_count,
+        ),
+        "quantity_ordered": rng.integers(
+            1,
+            501,
+            order_item_count,
+        ),
+        "unit_price": np.round(
+            rng.uniform(
+                100,
+                100000,
+                order_item_count,
+            ),
+            2,
+        ),
+        "total_price": np.round(
+            rng.uniform(
+                100,
+                500000,
+                order_item_count,
+            ),
+            2,
+        ),
+    }
 )
 
-order_item_ids_selected = rng.choice(
-    item_ids,
-    order_item_count
-)
-
-quantities_ordered = rng.integers(
-    10,
-    1000,
-    order_item_count
-)
-
-order_unit_prices = np.round(
-    rng.uniform(500, 150000, order_item_count),
-    2
-)
-
-total_prices = np.round(
-    quantities_ordered * order_unit_prices,
-    2
-)
-
-order_items = pd.DataFrame({
-    "order_item_id": order_item_ids,
-    "order_id": order_item_order_ids,
-    "item_id": order_item_ids_selected,
-    "quantity_ordered": quantities_ordered,
-    "unit_price": order_unit_prices,
-    "total_price": total_prices
-})
 
 # ============================================================
 # 9. DELIVERIES
 # ============================================================
 
-delivery_count = 1000
+# Exactly one delivery per order.
+
+delivery_count = len(orders)
 
 delivery_ids = [
-    f"DEL{i:05d}"
+    f"DEL{i:04d}"
     for i in range(1, delivery_count + 1)
 ]
 
-delivery_order_ids = rng.choice(
-    order_ids,
-    delivery_count
-)
+delivery_order_ids = orders[
+    "order_id"
+].tolist()
 
-promised_dates = pd.to_datetime(
-    rng.choice(
-        pd.date_range("2024-02-01", "2026-09-30"),
-        delivery_count
+promised_dates = (
+    pd.to_datetime(orders["order_date"])
+    + pd.to_timedelta(
+        rng.integers(
+            15,
+            91,
+            delivery_count,
+        ),
+        unit="D",
     )
 )
 
 delay_days = rng.choice(
-    [0, 0, 0, 1, 2, 3, 5, 7, 10, 15, 30],
-    delivery_count
+    [
+        0,
+        0,
+        0,
+        1,
+        2,
+        3,
+        5,
+        7,
+        10,
+        15,
+        20,
+    ],
+    delivery_count,
 )
 
 actual_delivery_dates = (
     promised_dates
-    + pd.to_timedelta(delay_days, unit="D")
+    + pd.to_timedelta(
+        delay_days,
+        unit="D",
+    )
 )
 
-quantity_ordered_delivery = rng.integers(
-    10,
-    1000,
-    delivery_count
+delivery_quantity_ordered = rng.integers(
+    1,
+    501,
+    delivery_count,
 )
 
-quantity_received = np.maximum(
-    quantity_ordered_delivery
-    - rng.integers(0, 30, delivery_count),
-    0
+# Make received quantity logically valid:
+# it cannot exceed quantity ordered.
+
+delivery_quantity_received = np.array(
+    [
+        rng.integers(
+            1,
+            quantity + 1,
+        )
+        for quantity in delivery_quantity_ordered
+    ]
 )
 
-delivery_status = np.where(
-    actual_delivery_dates <= promised_dates,
-    "On Time",
-    "Late"
+deliveries = pd.DataFrame(
+    {
+        "delivery_id": delivery_ids,
+        "order_id": delivery_order_ids,
+        "promised_date": promised_dates,
+        "actual_delivery_date": actual_delivery_dates,
+        "quantity_ordered": delivery_quantity_ordered,
+        "quantity_received": delivery_quantity_received,
+        "delivery_status": [
+            "On Time"
+            if delay == 0
+            else "Late"
+            for delay in delay_days
+        ],
+    }
 )
 
-deliveries = pd.DataFrame({
-    "delivery_id": delivery_ids,
-    "order_id": delivery_order_ids,
-    "promised_date": promised_dates,
-    "actual_delivery_date": actual_delivery_dates,
-    "quantity_ordered": quantity_ordered_delivery,
-    "quantity_received": quantity_received,
-    "delivery_status": delivery_status
-})
+
 # ============================================================
 # 10. QUALITY
 # ============================================================
 
-quality_count = 1000
+# Exactly one quality record per order.
+
+quality_count = len(orders)
 
 quality_ids = [
-    f"QLT{i:05d}"
+    f"QUAL{i:04d}"
     for i in range(1, quality_count + 1)
 ]
 
-quality_order_ids = rng.choice(
-    order_ids,
-    quality_count
-)
+quality_order_ids = orders[
+    "order_id"
+].tolist()
 
-inspection_dates = pd.to_datetime(
-    rng.choice(
-        pd.date_range("2024-02-01", "2026-09-30"),
-        quality_count
-    )
-)
-
+# Generate inspected quantity first.
 quantity_inspected = rng.integers(
-    10,
-    1000,
-    quality_count
+    1,
+    501,
+    quality_count,
 )
 
-defect_rates = rng.uniform(
-    0,
-    0.15,
-    quality_count
+# Generate defects based on the inspected quantity.
+# Therefore:
+#
+# defective_quantity <= quantity_inspected
+
+defective_quantity = np.array(
+    [
+        rng.integers(
+            0,
+            min(quantity, 20) + 1,
+        )
+        for quantity in quantity_inspected
+    ]
 )
 
-defective_quantity = (
-    quantity_inspected * defect_rates
-).astype(int)
+# Accepted quantity is always:
+#
+# inspected - defective
 
 quantity_accepted = (
-    quantity_inspected - defective_quantity
+    quantity_inspected
+    - defective_quantity
 )
 
-quality_status = np.where(
-    defective_quantity == 0,
-    "Passed",
-    np.where(
-        defective_quantity / quantity_inspected < 0.05,
-        "Minor Issues",
-        "Failed"
-    )
+quality = pd.DataFrame(
+    {
+        "quality_id": quality_ids,
+        "order_id": quality_order_ids,
+        "inspection_date": pd.to_datetime(
+            rng.choice(
+                pd.date_range(
+                    "2024-01-01",
+                    "2026-09-15",
+                ),
+                quality_count,
+            )
+        ),
+        "quantity_inspected": quantity_inspected,
+        "quantity_accepted": quantity_accepted,
+        "defective_quantity": defective_quantity,
+        "quality_status": [
+            "Passed"
+            if defect == 0
+            else "Passed with Issues"
+            if defect <= 5
+            else "Failed"
+            for defect in defective_quantity
+        ],
+        "quality_notes": [
+            "Routine quality inspection"
+            for _ in range(quality_count)
+        ],
+    }
 )
 
-quality_notes = np.where(
-    defective_quantity == 0,
-    "No major quality issues",
-    "Quality issues detected during inspection"
-)
-
-quality = pd.DataFrame({
-    "quality_id": quality_ids,
-    "order_id": quality_order_ids,
-    "inspection_date": inspection_dates,
-    "quantity_inspected": quantity_inspected,
-    "quantity_accepted": quantity_accepted,
-    "defective_quantity": defective_quantity,
-    "quality_status": quality_status,
-    "quality_notes": quality_notes
-})
 
 # ============================================================
-# 11. SAVE ALL DATA
+# 11. FINAL VALIDATION
 # ============================================================
 
-suppliers.to_csv("data/raw/suppliers.csv", index=False)
-items.to_csv("data/raw/items.csv", index=False)
-rfqs.to_csv("data/raw/rfqs.csv", index=False)
-rfq_items.to_csv("data/raw/rfq_items.csv", index=False)
-quotations.to_csv("data/raw/quotations.csv", index=False)
+print("\nRunning validation checks...")
+
+
+# ------------------------------------------------------------
+# Primary key uniqueness
+# ------------------------------------------------------------
+
+assert suppliers["supplier_id"].is_unique
+assert items["item_id"].is_unique
+assert rfqs["rfq_id"].is_unique
+assert rfq_items["rfq_item_id"].is_unique
+assert quotations["quotation_id"].is_unique
+assert quotation_items["quotation_item_id"].is_unique
+assert orders["order_id"].is_unique
+assert order_items["order_item_id"].is_unique
+assert deliveries["delivery_id"].is_unique
+assert quality["quality_id"].is_unique
+
+
+# ------------------------------------------------------------
+# RFQ item coverage
+# ------------------------------------------------------------
+
+assert set(
+    rfqs["rfq_id"]
+) == set(
+    rfq_items["rfq_id"]
+)
+
+
+# ------------------------------------------------------------
+# Quotation relationships
+# ------------------------------------------------------------
+
+assert set(
+    quotations["rfq_id"]
+).issubset(
+    set(rfqs["rfq_id"])
+)
+
+assert set(
+    quotations["supplier_id"]
+).issubset(
+    set(suppliers["supplier_id"])
+)
+
+assert set(
+    quotation_items["quotation_id"]
+).issubset(
+    set(quotations["quotation_id"])
+)
+
+assert set(
+    quotation_items["rfq_item_id"]
+).issubset(
+    set(rfq_items["rfq_item_id"])
+)
+
+assert len(relationship_errors) == 0
+
+
+# ------------------------------------------------------------
+# Delivery relationships
+# ------------------------------------------------------------
+
+assert set(
+    deliveries["order_id"]
+) == set(
+    orders["order_id"]
+)
+
+assert (
+    deliveries["order_id"].nunique()
+    == len(orders)
+)
+
+assert (
+    deliveries["quantity_received"]
+    <= deliveries["quantity_ordered"]
+).all()
+
+
+# ------------------------------------------------------------
+# Quality relationships
+# ------------------------------------------------------------
+
+assert set(
+    quality["order_id"]
+) == set(
+    orders["order_id"]
+)
+
+assert (
+    quality["order_id"].nunique()
+    == len(orders)
+)
+
+
+# ------------------------------------------------------------
+# Quality quantity validation
+# ------------------------------------------------------------
+
+assert (
+    quality["quantity_accepted"]
+    <= quality["quantity_inspected"]
+).all()
+
+assert (
+    quality["defective_quantity"]
+    <= quality["quantity_inspected"]
+).all()
+
+assert (
+    quality["quantity_accepted"]
+    + quality["defective_quantity"]
+    == quality["quantity_inspected"]
+).all()
+
+
+print("All validation checks passed.")
+
+
+# ============================================================
+# 12. SAVE DATASETS
+# ============================================================
+
+suppliers.to_csv(
+    f"{RAW_DATA_DIR}/suppliers.csv",
+    index=False,
+)
+
+items.to_csv(
+    f"{RAW_DATA_DIR}/items.csv",
+    index=False,
+)
+
+rfqs.to_csv(
+    f"{RAW_DATA_DIR}/rfqs.csv",
+    index=False,
+)
+
+rfq_items.to_csv(
+    f"{RAW_DATA_DIR}/rfq_items.csv",
+    index=False,
+)
+
+quotations.to_csv(
+    f"{RAW_DATA_DIR}/quotations.csv",
+    index=False,
+)
+
 quotation_items.to_csv(
-    "data/raw/quotation_items.csv",
-    index=False
+    f"{RAW_DATA_DIR}/quotation_items.csv",
+    index=False,
 )
-orders.to_csv("data/raw/orders.csv", index=False)
+
+orders.to_csv(
+    f"{RAW_DATA_DIR}/orders.csv",
+    index=False,
+)
+
 order_items.to_csv(
-    "data/raw/order_items.csv",
-    index=False
+    f"{RAW_DATA_DIR}/order_items.csv",
+    index=False,
 )
+
 deliveries.to_csv(
-    "data/raw/deliveries.csv",
-    index=False
+    f"{RAW_DATA_DIR}/deliveries.csv",
+    index=False,
 )
+
 quality.to_csv(
-    "data/raw/quality.csv",
-    index=False
+    f"{RAW_DATA_DIR}/quality.csv",
+    index=False,
 )
 
 
-print("\n==============================")
-print("PROCUREMENT DATA GENERATED")
-print("==============================")
+# ============================================================
+# 13. FINAL SUMMARY
+# ============================================================
 
+print("\nData generation completed successfully.")
+print()
+print("Generated datasets:")
 print("Suppliers:", len(suppliers))
 print("Items:", len(items))
 print("RFQs:", len(rfqs))
@@ -683,6 +978,5 @@ print("Orders:", len(orders))
 print("Order Items:", len(order_items))
 print("Deliveries:", len(deliveries))
 print("Quality Records:", len(quality))
-
-print("\nData generation completed.")
-
+print()
+print(f"Files saved to: {RAW_DATA_DIR}")
