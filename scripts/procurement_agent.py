@@ -16,9 +16,9 @@ def analyze_rfq(rfq_id):
     print(f"RFQ: {rfq_id}")
     print()
 
-    # ---------------------------------------------------------
-    # 1. QUOTATION ANALYSIS
-    # ---------------------------------------------------------
+    # -----------------------------------------------------
+    # STEP 1 — QUOTATION COMPARISON
+    # -----------------------------------------------------
 
     print("Step 1: Comparing supplier quotations...")
 
@@ -30,14 +30,18 @@ def analyze_rfq(rfq_id):
             "message": f"No quotations found for {rfq_id}"
         }
 
-    print(f"Found {len(quotations)} quotation records.")
+    print(
+        f"Found {len(quotations)} quotation records."
+    )
     print()
 
-    # ---------------------------------------------------------
-    # 2. SUPPLIER ANALYSIS
-    # ---------------------------------------------------------
+    # -----------------------------------------------------
+    # STEP 2 — SUPPLIER HISTORY AND RISK
+    # -----------------------------------------------------
 
-    print("Step 2: Analyzing supplier history and risk...")
+    print(
+        "Step 2: Analyzing supplier history and risk..."
+    )
 
     supplier_ids = list({
         quotation["supplier_id"]
@@ -67,9 +71,9 @@ def analyze_rfq(rfq_id):
     )
     print()
 
-    # ---------------------------------------------------------
-    # 3. DECISION ENGINE
-    # ---------------------------------------------------------
+    # -----------------------------------------------------
+    # STEP 3 — DECISION ENGINE
+    # -----------------------------------------------------
 
     print(
         "Step 3: Running procurement decision engine..."
@@ -79,14 +83,18 @@ def analyze_rfq(rfq_id):
         rfq_id
     )
 
-    print("Decision engine completed.")
+    print(
+        "Decision engine completed."
+    )
     print()
 
-    # ---------------------------------------------------------
-    # 4. DOCUMENT / RAG ANALYSIS
-    # ---------------------------------------------------------
+    # -----------------------------------------------------
+    # STEP 4 — DOCUMENT / RAG ANALYSIS
+    # -----------------------------------------------------
 
-    print("Step 4: Checking procurement documents...")
+    print(
+        "Step 4: Checking procurement documents..."
+    )
 
     document_question = (
         f"What quotation terms, payment terms, discounts, "
@@ -99,17 +107,41 @@ def analyze_rfq(rfq_id):
         top_k=3
     )
 
-    document_analysis = generate_answer(
-        query=document_question,
-        context=document_context
-    )
+    # Gemini may be unavailable because of API
+    # quota/rate limits. Do not let that failure
+    # crash the entire procurement analysis.
 
-    print("Document analysis completed.")
+    try:
+
+        document_analysis = generate_answer(
+            query=document_question,
+            context=document_context
+        )
+
+        print(
+            "Document analysis completed."
+        )
+
+    except Exception as e:
+
+        document_analysis = (
+            "Document analysis is temporarily unavailable "
+            "because the LLM service could not be reached."
+        )
+
+        print(
+            "Document analysis unavailable."
+        )
+
+        print(
+            f"Reason: {type(e).__name__}"
+        )
+
     print()
 
-    # ---------------------------------------------------------
-    # 5. FINAL RESULT
-    # ---------------------------------------------------------
+    # -----------------------------------------------------
+    # FINAL RESULT
+    # -----------------------------------------------------
 
     return {
         "status": "success",
@@ -121,9 +153,9 @@ def analyze_rfq(rfq_id):
     }
 
 
-# =============================================================
+# ---------------------------------------------------------
 # TEST
-# =============================================================
+# ---------------------------------------------------------
 
 if __name__ == "__main__":
 
@@ -157,3 +189,9 @@ if __name__ == "__main__":
             f"Risk: {risk['risk_level']} | "
             f"Score: {risk['risk_score']}"
         )
+
+    print()
+    print("Document Analysis:")
+    print(
+        result["document_analysis"]
+    )
