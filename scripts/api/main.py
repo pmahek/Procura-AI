@@ -54,6 +54,13 @@ class NegotiationRequest(BaseModel):
     supplier_id: str
 
 
+class NegotiationApprovalRequest(BaseModel):
+    rfq_id: str
+    supplier_id: str
+    decision: str
+    email: str
+
+
 # ---------------------------------------------------------
 # ROOT
 # ---------------------------------------------------------
@@ -75,7 +82,9 @@ def root():
 @app.get("/supplier/{supplier_id}")
 def supplier_endpoint(supplier_id: str):
 
-    result = get_supplier_history(supplier_id)
+    result = get_supplier_history(
+        supplier_id
+    )
 
     if result is None:
 
@@ -186,7 +195,7 @@ def analyze_rfq_endpoint(
 
 
 # ---------------------------------------------------------
-# NEGOTIATION EMAIL
+# NEGOTIATION EMAIL GENERATION
 # ---------------------------------------------------------
 
 @app.post("/negotiation-email")
@@ -207,3 +216,44 @@ def negotiation_email_endpoint(
         )
 
     return result
+
+
+# ---------------------------------------------------------
+# NEGOTIATION EMAIL HUMAN APPROVAL
+# ---------------------------------------------------------
+
+@app.post("/negotiation-email/approve")
+def approve_negotiation_email(
+    request: NegotiationApprovalRequest
+):
+
+    decision = request.decision.strip().lower()
+
+    if decision not in [
+        "approved",
+        "rejected",
+        "edited"
+    ]:
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Invalid decision. "
+                "Use approved, rejected, or edited."
+            )
+        )
+
+    if not request.email.strip():
+
+        raise HTTPException(
+            status_code=400,
+            detail="Email content cannot be empty."
+        )
+
+    return {
+        "status": decision,
+        "rfq_id": request.rfq_id,
+        "supplier_id": request.supplier_id,
+        "human_approval": True,
+        "email": request.email
+    }
